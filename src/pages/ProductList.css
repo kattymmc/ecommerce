@@ -1,0 +1,39 @@
+.ProductList h1 {
+    margin: 20px;
+}
+
+.ProductList span {
+    font-size: 20px;
+    font-weight: 600;
+    margin-right: 20px;
+}
+
+.ProductList select {
+    padding: 10px;
+    margin-right: 20px;
+}
+
+.ProductList .filter-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.ProductList .filter {
+    margin: 20px;
+}
+
+@media only screen and (max-width: 480px){
+    .ProductList .filter {
+        width: 0px 20px;
+        display: flex;
+        flex-direction: column;
+    } 
+
+    .ProductList span {
+        margin-right: 0px;
+    }
+
+    .ProductList select {
+        margin: 10px;
+    }
+}

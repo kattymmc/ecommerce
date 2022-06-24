@@ -43,7 +43,6 @@
 
 .Navbar input {
     border: none;
-
 }
 
 .Navbar h1 {
@@ -54,4 +53,35 @@
     font-size: 14px;
     cursor: pointer;
     margin-left: 25px;
+}
+
+@media only screen and (max-width: 480px){
+    .Navbar.container {
+        height: 50px;
+    }
+  
+    .Navbar .wrapper {
+        padding: 10px 0px;
+    }
+
+    .Navbar .language {
+        display: none;
+    }
+
+    .Navbar input {
+        width: 50px;
+    }
+
+    .Navbar h1 {
+        font-size: 24px;
+    }
+
+    .Navbar .right {
+        flex: 2;
+        justify-content: center;
+    }
+    .Navbar .menuItem {
+        font-size: 12px;
+        margin-left: 10px;
+    }
 }
