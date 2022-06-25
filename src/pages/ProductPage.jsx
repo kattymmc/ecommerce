@@ -8,6 +8,8 @@ import styled from 'styled-components'
 import { Add, Remove } from '@mui/icons-material';
 import { publicRequest } from '../requestMethods';
 import { useLocation } from 'react-router-dom';
+import { addProduct } from '../redux/cartRedux';
+import { useDispatch } from 'react-redux/es/hooks/useDispatch';
 
 const FilterColor = styled.div`
     width: 20px;
@@ -24,6 +26,7 @@ const ProductPage = () => {
     const [quantity, setQuantity] = useState(1);
     const [color, setColor] = useState("");
     const [size, setSize] = useState("");
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const getProduct = async () => {
@@ -43,20 +46,25 @@ const ProductPage = () => {
         }
     }
 
+    const handleClick = () => {
+        // update cart
+        dispatch(addProduct({ ...product, quantity, color, size }))
+    }
+
     return(
         <div className='ProductPage'>
             <Navbar />
             <AnnouncementBar />
             <div className='wrapper-page'>
                 <div className='img-container-page'>
-                    <img className='img-product-page' src={product.img} alt="Product"/>
+                    <img className='img-product-page' src={product.imagen} alt="Product"/>
                 </div>
                 <div className='info-container-page'>
-                    <h1>{product.title}</h1>
+                    <h1>{product.titulo}</h1>
                     <p>
-                        {product.desc}
+                        {product.descripcion}
                     </p>
-                    <span className='price'>$ {product.price}</span>
+                    <span className='price'>$ {product.precio}</span>
                     <div className='filter-container'>
                         <div className='filter'>
                             <span className='filter-title'>Color</span>
@@ -67,20 +75,20 @@ const ProductPage = () => {
                         <div className='filter'>
                             <span className='filter-title'>Size</span>
                             <select className='filter-size' onChange={(e) => setSize(e.target.value)}>
-                                {product.size?.map((s) => (
+                                {product.tamano?.map((s) => (
                                     <option key={s}>{s}</option>
                                 ))}
                                 <option>XS</option>
                             </select>
                         </div>
                     </div>
-                    <div class='add-container'>
+                    <div className='add-container'>
                         <div className='amount-container'>
                             <Remove onClick={() => handleQuantity("dec")} />
                             <span className='amount'>{quantity}</span>
                             <Add onClick={() => handleQuantity("inc")} />
                         </div>
-                        <button>ADD TO CART</button>
+                        <button onClick={handleClick}>ADD TO CART</button>
                     </div>
                 </div>
             </div>

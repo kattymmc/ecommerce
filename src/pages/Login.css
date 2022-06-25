@@ -46,6 +46,11 @@
     margin-bottom: 10px;
 }
 
+.Login button:disabled {
+    color: green;
+    cursor: not-allowed;
+}
+
 .Login a {
     margin: 5px 0px;
     font-size: 12px;
@@ -53,6 +58,9 @@
     cursor: pointer;
 }
 
+.Login .error {
+    color: red;
+}
 
 @media only screen and (max-width: 480px){
     .Login .login-wrapper {

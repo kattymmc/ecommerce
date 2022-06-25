@@ -5,6 +5,14 @@ import Navbar from '../components/Navbar';
 import styled from 'styled-components'
 import './Cart.css'
 import { Add, Remove } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
+import StripeCheckout from 'react-stripe-checkout';
+import { useState } from 'react';
+import { userRequest } from '../requestMethods';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const KEY = process.env.REACT_APP_STRIPE;
 
 const ProductColor = styled.div`
     width: 20px;
@@ -14,68 +22,73 @@ const ProductColor = styled.div`
 `
 
 const Cart = () => {
+    const cart = useSelector(state => state.cart);
+    const [stripeToken, setStripeToken] = useState(null);
+    const history = useNavigate();
+
+    const onToken = (token) => {
+        setStripeToken(token);
+    }
+
+    useEffect(() => {
+        const makeRequest = async () => {
+            try {
+                const res = await userRequest.post("/checkout/payment", {
+                    tokenId: stripeToken.id,
+                    amount: cart.total * 100
+                });
+                history.push("/success", { data: res.data });
+            } catch {}
+        }
+        stripeToken && cart.total >= 1 && makeRequest();
+    }, [stripeToken, cart.total, history]);
+
+    console.log(stripeToken);
     return (
         <div className='Cart'>
             <Navbar />
             <AnnouncementBar />
-            <div class="cart-wrapper"> 
+            <div className="cart-wrapper"> 
                 <h1 className="cart-title">YOUR BAG</h1>
                 <div className='top'>
                     <button className='top-button'>CONTINUE SHOPPING</button>
                     <div className='top-texts'>
-                        <span class='top-text'>Shopping Bags(2)</span>
-                        <span class='top-text'>Your Wishlist(0)</span>
+                        <span className='top-text'>Shopping Bags(2)</span>
+                        <span className='top-text'>Your Wishlist(0)</span>
                     </div>
                     <button className='top-button filled'>CHECKOUT NOW</button>
                 </div>
                 <div className='bottom'>
                     <div className='info'>
-                        <div className='product'>
-                            <div className='product-detail'>
-                                <img src='https://hips.hearstapps.com/vader-prod.s3.amazonaws.com/1614188818-TD1MTHU_SHOE_ANGLE_GLOBAL_MENS_TREE_DASHERS_THUNDER_b01b1013-cd8d-48e7-bed9-52db26515dc4.png?crop=1xw:1.00xh;center,top&resize=480%3A%2A' alt="Product"/>
-                                <div className='details'>
-                                    <span className='product-name'><b>Product:</b> JESSIE THUNDER SHOES</span>
-                                    <span className='product-id'><b>ID:</b> 93475848123</span>
-                                    <ProductColor color='black' />
-                                    <span className='product-size'><b>Size:</b> 37.5</span>
+                        {cart.products.map((product) => (
+                            <div className='product'>
+                                <div className='product-detail'>
+                                    <img src={product.imagen} alt="Product"/>
+                                    <div className='details'>
+                                        <span className='product-name'><b>Product:</b>{product.titulo}</span>
+                                        <span className='product-id'><b>ID:</b> {product._id}</span>
+                                        <ProductColor color={product.color} />
+                                        <span className='product-size'><b>Size:</b> {product.tamano}</span>
+                                    </div>
+                                </div>
+                                <div className='price-detail'>
+                                    <div className='product-amount-container'>
+                                    <Add />
+                                    <span className='product-amount'>{product.quantity}</span>
+                                    <Remove />
+                                    </div>
+                                    <span className='product-price'>$ {product.precio * product.quantity}</span>
                                 </div>
                             </div>
-                            <div className='price-detail'>
-                                <div className='product-amount-container'>
-                                <Add />
-                                <span className='product-amount'>2</span>
-                                <Remove />
-                                </div>
-                                <span className='product-price'>$ 30</span>
-                            </div>
-                        </div>
+                        ))}
                         <hr />
-                        <div className='product'>
-                            <div className='product-detail'>
-                                <img src='https://hips.hearstapps.com/vader-prod.s3.amazonaws.com/1614188818-TD1MTHU_SHOE_ANGLE_GLOBAL_MENS_TREE_DASHERS_THUNDER_b01b1013-cd8d-48e7-bed9-52db26515dc4.png?crop=1xw:1.00xh;center,top&resize=480%3A%2A' alt="Product" />
-                                <div className='details'>
-                                    <span className='product-name'><b>Product:</b> JESSIE THUNDER SHOES</span>
-                                    <span className='product-id'><b>ID:</b> 93475848123</span>
-                                    <ProductColor color='black' />
-                                    <span className='product-size'><b>Size:</b> 37.5</span>
-                                </div>
-                            </div>
-                            <div className='price-detail'>
-                                <div className='product-amount-container'>
-                                <Add />
-                                <span className='product-amount'>2</span>
-                                <Remove />
-                                </div>
-                                <span className='product-price'>$ 30</span>
-                            </div>
-                        </div>
                     </div>
                     
                     <div className='summary'>
                         <h1 className='summary-title'>ORDER SUMMARY</h1>
                         <div className='summary-item'>
                             <span className='summary-item-text'>Subtotal</span>
-                            <span className='summary-item-price'>$ 80</span>
+                            <span className='summary-item-price'>$ {cart.total}</span>
                         </div>
                         <div className='summary-item'>
                             <span className='summary-item-text'>Estimated Shipping</span>
@@ -87,9 +100,18 @@ const Cart = () => {
                         </div>
                         <div className='summary-item total'>
                             <span className='summary-item-text'>Total</span>
-                            <span className='summary-item-price'>$ 80</span>
+                            <span className='summary-item-price'>$ {cart.total}</span>
                         </div>
-                        <button className='summary-button'>CHECKOUT</button>
+                        <StripeCheckout
+                            name="Katty Shop"
+                            image="https://avatars.githubusercontent.com/u/1486366?v=4"
+                            billingAddress
+                            shippingAddress
+                            description={`Your total is $${cart.total}`}
+                            amount={cart.total*100}
+                            token={onToken}
+                            stripeKey={KEY}>
+                        </StripeCheckout>
                     </div>
                 </div>
             </div>
